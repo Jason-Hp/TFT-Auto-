@@ -1,0 +1,52 @@
+#Champions you want to buy (PLEASE FILL IN)
+ChampionList = ['img_6.png','img_5.png','img_4.png','img_3.png']
+
+for champ in ChampionList:
+    checker[champ] = 0
+
+#Amount of time to refresh
+refresh = 10
+
+def click(x, y):
+    win32api.SetCursorPos((x,y))
+    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,0,0)
+    time.sleep(0.03)
+    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0)
+
+while keyboard.is_pressed('z') == False:
+    continue
+
+#Goes through no. of refresh
+#refresh box too
+for i in range(refresh):
+    BOX_REGIONS = [(620, 810), (765, 810), (905, 810), (1050, 810), (1195, 810)]
+    boxes_to_remove = []
+# Goes through 'champion list'
+    for png in list(ChampionList):
+        #Goes from BOX 1 to 5, check if it is said champion, it so then click(BUY)
+        for i, (box_x, box_y) in enumerate(BOX_REGIONS, start=1):
+            try:
+                location = pyautogui.locateOnScreen(png, region=(box_x, box_y, *BOX_SIZE), grayscale=True, confidence=CONFIDENCE_THRESHOLD)
+                if location is not None:
+                    click(box_x + BOX_SIZE[0] // 2, box_y + BOX_SIZE[1] // 2)
+
+                    #Remove the box from checking
+                    boxes_to_remove.append(i-1)
+
+                    #Check if this champion has been bought for 3 times
+                    checker[png] = checker[png] + 1
+                    if checker[png] >= 3:
+                        ChampionList.remove(png)
+                        break
+                else:
+                    time.sleep(0.01)
+            except pyautogui.ImageNotFoundException:
+                pass
+        # Remove boxes from BOX_REGIONS
+        for i in boxes_to_remove:
+            BOX_REGIONS.pop(i)
+        boxes_to_remove = []
+    #Refresh the shop
+    keyboard.press('d')
+    time.sleep(0.04)
+    keyboard.release('d')
